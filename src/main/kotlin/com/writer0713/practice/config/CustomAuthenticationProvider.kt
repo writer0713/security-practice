@@ -7,15 +7,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.stereotype.Component
 
 class CustomAuthenticationProvider(
     private val userDetailsService: UserDetailsService,
-    private val passwordEncoder: PasswordEncoder
-    ) : AuthenticationProvider {
-
+    private val passwordEncoder: PasswordEncoder,
+) : AuthenticationProvider {
     companion object {
-        private val log = KotlinLogging.logger {  }
+        private val log = KotlinLogging.logger { }
     }
 
     override fun authenticate(authentication: Authentication): Authentication {
@@ -32,7 +30,5 @@ class CustomAuthenticationProvider(
         throw AuthenticationCredentialsNotFoundException("Error in authentication!")
     }
 
-    override fun supports(authentication: Class<*>?): Boolean {
-        return authentication == UsernamePasswordAuthenticationToken::class.java
-    }
+    override fun supports(authentication: Class<*>?): Boolean = authentication == UsernamePasswordAuthenticationToken::class.java
 }

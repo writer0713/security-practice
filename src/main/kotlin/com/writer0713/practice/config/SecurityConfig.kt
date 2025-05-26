@@ -15,41 +15,58 @@ import org.springframework.security.web.SecurityFilterChain
 
 @EnableWebSecurity
 @Configuration
-class SecurityConfig(
-) {
-
+class SecurityConfig {
     @Bean
-    fun filterChain(http: HttpSecurity, customAuthenticationProvider: AuthenticationProvider): SecurityFilterChain {
-
+    fun filterChain(
+        http: HttpSecurity,
+        customAuthenticationProvider: AuthenticationProvider,
+    ): SecurityFilterChain {
         http.authorizeHttpRequests { auth ->
             auth.anyRequest().permitAll()
         }
 
         http.formLogin(withDefaults())
 
+        http.authenticationProvider(customAuthenticationProvider)
+
         return http.build()
     }
 
+//    @Bean
+//    fun customAuthenticationManager(
+//        http: HttpSecurity,
+//        customUserDetailsService: UserDetailsService,
+//        customPasswordEncoder: PasswordEncoder
+//    ): AuthenticationManager {
+//        val authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder::class.java)
+//
+//        authenticationManagerBuilder
+//            .userDetailsService(customUserDetailsService)
+//            .passwordEncoder(customPasswordEncoder)
+//
+//        return authenticationManagerBuilder.build()
+//    }
 
     @Bean
     fun customAuthenticationProvider(
-        userDetailsService: UserDetailsService,
-        passwordEncoder: PasswordEncoder
-    ): AuthenticationProvider {
-        return CustomAuthenticationProvider(
-            userDetailsService,
-            passwordEncoder
+        customUserDetailsService: UserDetailsService,
+        customPasswordEncoder: PasswordEncoder,
+    ): AuthenticationProvider =
+        CustomAuthenticationProvider(
+            customUserDetailsService,
+            customPasswordEncoder,
         )
-    }
 
     @Bean
     fun customUserDetailsService(): UserDetailsService {
         val userDetailsService = InMemoryUserDetailsManager()
 
-        val user = User.withUsername("user")
-            .password("12345")
-            .authorities("read")
-            .build()
+        val user =
+            User
+                .withUsername("user")
+                .password("12345")
+                .authorities("read")
+                .build()
 
         userDetailsService.createUser(user)
 
@@ -57,8 +74,8 @@ class SecurityConfig(
     }
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
+    fun customPasswordEncoder(): PasswordEncoder {
         return NoOpPasswordEncoder.getInstance()
+//        return BCryptPasswordEncoder()
     }
-
 }
